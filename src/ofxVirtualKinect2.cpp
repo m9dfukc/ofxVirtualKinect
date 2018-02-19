@@ -1,9 +1,9 @@
-#include "ofxVirtualKinect.h"
+#include "ofxVirtualKinect2.h"
 
 const unsigned int camWidth = 640;
 const unsigned int camHeight = 480;
 
-ofxVirtualKinect::ofxVirtualKinect() :
+ofxVirtualKinect2::ofxVirtualKinect2() :
 newFrame(false),
 maxLength(100),
 stepSize(2),
@@ -16,23 +16,23 @@ cameraRotation(ofVec3f(0, 0, 0)),
 horizontalFlip(true) {
 }
 
-void ofxVirtualKinect::setup() {
+void ofxVirtualKinect2::setup() {
 	surface.resize(camWidth * camHeight);
 	indices.resize(camWidth * camHeight * 3);
-	
+
 	kinect.init(false, false);
 	kinect.open();
-	
+
 	fbo.allocate(camWidth, camHeight, GL_RGB);
 	colorImage.allocate(camWidth, camHeight, OF_IMAGE_COLOR);
 	grayImage.allocate(camWidth, camHeight, OF_IMAGE_GRAYSCALE);
 }
 
-void ofxVirtualKinect::close() {
+void ofxVirtualKinect2::close() {
     kinect.close();
 }
 
-void ofxVirtualKinect::updateSurface() {
+void ofxVirtualKinect2::updateSurface() {
     float* z = kinect.getDistancePixels().getData();
 	for(int y = 0; y < camHeight; y += stepSize) {
 		for(int x = 0; x < camWidth; x += stepSize) {
@@ -44,7 +44,7 @@ void ofxVirtualKinect::updateSurface() {
 	}
 }
 
-void ofxVirtualKinect::updateMesh() {
+void ofxVirtualKinect2::updateMesh() {
 	float* z = kinect.getDistancePixels().getData();
 	indices.clear();
 	for(int y = 0; y < camHeight - stepSize; y += stepSize) {
@@ -58,14 +58,14 @@ void ofxVirtualKinect::updateMesh() {
 			float ne = z[nei];
 			float sw = z[swi];
 			float se = z[sei];
-			
+
 			if(nw != 0 && ne != 0 && sw != 0 &&
 				 abs(nw - ne) < maxLength && abs(nw - sw) < maxLength) {
 				indices.push_back(nwi);
 				indices.push_back(nei);
 				indices.push_back(swi);
 			}
-			
+
 			if(ne != 0 && se != 0 && sw != 0 &&
 				 abs(sw - se) < maxLength && abs(ne - se) < maxLength) {
 				indices.push_back(nei);
@@ -76,12 +76,12 @@ void ofxVirtualKinect::updateMesh() {
 	}
 }
 
-void ofxVirtualKinect::renderCamera() {
+void ofxVirtualKinect2::renderCamera() {
 	fbo.begin();
 	ofClear(0, 255);
-	
+
 	glEnable(GL_FOG);
-	
+
 	glClearColor(0, 0, 0, 1);
 	glFogi(GL_FOG_MODE, GL_LINEAR);
 	GLfloat fogColor[4]= {0, 0, 0, 1};
@@ -89,16 +89,16 @@ void ofxVirtualKinect::renderCamera() {
 	glHint(GL_FOG_HINT, GL_FASTEST);
 	glFogf(GL_FOG_START, nearClipping);
 	glFogf(GL_FOG_END, farClipping);
-	
+
 	ofPushMatrix();
-	
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-320 * orthoScale, 320 * orthoScale, -240 * orthoScale, 240 * orthoScale, nearClipping, farClipping);
 	glMatrixMode(GL_MODELVIEW);
-	
+
 	glLoadIdentity();
-	
+
 	ofRotateX(sceneRotation.x);
 	ofRotateY(sceneRotation.y);
 	ofRotateZ(sceneRotation.z);
@@ -106,9 +106,9 @@ void ofxVirtualKinect::renderCamera() {
 	ofRotateX(cameraRotation.x);
 	ofRotateY(cameraRotation.y);
 	ofRotateZ(cameraRotation.z);
-	
+
 	ofScale(horizontalFlip ? -1 : 1, 1, -1);
-	
+
     ofPushStyle();
     ofEnableDepthTest();
 	ofSetColor(255);
@@ -118,15 +118,15 @@ void ofxVirtualKinect::renderCamera() {
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
 	glDisableClientState(GL_VERTEX_ARRAY);
     ofPopStyle();
-	
+
 	ofPopMatrix();
-	
+
 	glDisable(GL_FOG);
-	
+
 	fbo.end();
 }
 
-void ofxVirtualKinect::updatePixels() {
+void ofxVirtualKinect2::updatePixels() {
 	fbo.readToPixels(colorImage);
     unsigned char* grayPixels = grayImage.getData();
 	unsigned char* colorPixels = colorImage.getData();
@@ -138,7 +138,7 @@ void ofxVirtualKinect::updatePixels() {
 	}
 }
 
-void ofxVirtualKinect::update() {
+void ofxVirtualKinect2::update() {
 	kinect.update();
 	if(kinect.isFrameNew()) {
 		newFrame = true;
@@ -149,66 +149,66 @@ void ofxVirtualKinect::update() {
 	}
 }
 
-bool ofxVirtualKinect::isFrameNew() {
+bool ofxVirtualKinect2::isFrameNew() {
 	bool curNewFrame = newFrame;
 	newFrame = false;
 	return curNewFrame;
 }
 
-ofPixels& ofxVirtualKinect::getPixels() {
+ofPixels& ofxVirtualKinect2::getPixels() {
 	return grayImage;
 }
 
-const ofPixels& ofxVirtualKinect::getPixels() const {
+const ofPixels& ofxVirtualKinect2::getPixels() const {
     return grayImage;
 }
 
 
-void ofxVirtualKinect::draw(float x, float y) {
+void ofxVirtualKinect2::draw(float x, float y) {
 	fbo.draw(x, y);
 }
 
-void ofxVirtualKinect::setMaxLength(float maxLength) {
+void ofxVirtualKinect2::setMaxLength(float maxLength) {
 	this->maxLength = maxLength;
 }
 
-void ofxVirtualKinect::setStepSize(int stepSize) {
+void ofxVirtualKinect2::setStepSize(int stepSize) {
 	this->stepSize = stepSize;
 }
 
-void ofxVirtualKinect::setClipping(float nearClipping, float farClipping) {
+void ofxVirtualKinect2::setClipping(float nearClipping, float farClipping) {
 	this->nearClipping = nearClipping;
 	this->farClipping = farClipping;
 }
 
-void ofxVirtualKinect::setOrthoScale(float orthoScale) {
+void ofxVirtualKinect2::setOrthoScale(float orthoScale) {
 	this->orthoScale = orthoScale;
 }
 
-void ofxVirtualKinect::setPosition(ofVec3f position) {
+void ofxVirtualKinect2::setPosition(ofVec3f position) {
 	this->position = position;
 }
 
-void ofxVirtualKinect::setCameraRotation(ofVec3f cameraRotation) {
+void ofxVirtualKinect2::setCameraRotation(ofVec3f cameraRotation) {
 	this->cameraRotation = cameraRotation;
 }
 
-void ofxVirtualKinect::setSceneRotation(ofVec3f sceneRotation) {
+void ofxVirtualKinect2::setSceneRotation(ofVec3f sceneRotation) {
 	this->sceneRotation = sceneRotation;
 }
 
-void ofxVirtualKinect::setHorizontalFlip(bool horizontalFlip) {
+void ofxVirtualKinect2::setHorizontalFlip(bool horizontalFlip) {
 	this->horizontalFlip = horizontalFlip;
 }
 
-float ofxVirtualKinect::grayToDistance(unsigned char value) const {
+float ofxVirtualKinect2::grayToDistance(unsigned char value) const {
     return (1 - (float(value) / 255.)) * (farClipping - nearClipping) + nearClipping;
 }
 
-int ofxVirtualKinect::getWidth() const {
+int ofxVirtualKinect2::getWidth() const {
 	return camWidth;
 }
 
-int ofxVirtualKinect::getHeight() const {
+int ofxVirtualKinect2::getHeight() const {
 	return camHeight;
 }

@@ -1,3 +1,3 @@
 ofxGui
-ofxKinect
+ofxMultiKinectV2
 ofxVirtualKinect
