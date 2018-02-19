@@ -32,7 +32,7 @@ public:
     ofFbo fbo;
 
 private:
-	ofxKinect kinect;
+	ofxMultiKinectV2 kinect;
 
 	vector<ofVec3f> surface;
 	vector<unsigned int> indices;

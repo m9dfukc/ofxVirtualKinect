@@ -2,7 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxGui.h"
-#include "ofxVirtualKinect.h"
+#include "ofxVirtualKinectV2.h"
 
 class ofApp : public ofBaseApp {
 public:
@@ -12,7 +12,7 @@ public:
 	void draw();
     void exit();
 	
-	ofxVirtualKinect kinect;
+	ofxVirtualKinectV2 kinect;
     ofxPanel panel;
     ofParameter<ofVec3f> position, cameraRotation, sceneRotation;
     ofParameter<float> near, far, maxLength, orthoScale;

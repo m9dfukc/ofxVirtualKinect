@@ -1,7 +1,7 @@
 #include "ofxVirtualKinectV2.h"
 
-const unsigned int camWidth = 640;
-const unsigned int camHeight = 480;
+const unsigned int camWidth = 512;
+const unsigned int camHeight = 424;
 
 ofxVirtualKinectV2::ofxVirtualKinectV2() :
 newFrame(false),
@@ -20,8 +20,8 @@ void ofxVirtualKinectV2::setup() {
 	surface.resize(camWidth * camHeight);
 	indices.resize(camWidth * camHeight * 3);
 
-	kinect.init(false, false);
-	kinect.open();
+	kinect.open(false, true);
+    kinect.start();
 
 	fbo.allocate(camWidth, camHeight, GL_RGB);
 	colorImage.allocate(camWidth, camHeight, OF_IMAGE_COLOR);
@@ -33,53 +33,51 @@ void ofxVirtualKinectV2::close() {
 }
 
 void ofxVirtualKinectV2::updateSurface() {
-    float* z = kinect.getDistancePixels().getData();
-	for(int y = 0; y < camHeight; y += stepSize) {
-		for(int x = 0; x < camWidth; x += stepSize) {
-			int i = y * camWidth + x;
-			if(z[i] != 0) {
-				surface[i] = kinect.getWorldCoordinateAt(x, y);
-			}
-		}
-	}
+    for(int y = 0; y < camHeight; y += stepSize) {
+        for(int x = 0; x < camWidth; x += stepSize) {
+            int i = y * camWidth + x;
+            surface[i] = kinect.getWorldCoordinateAt(x, y);
+        }
+    }
 }
 
 void ofxVirtualKinectV2::updateMesh() {
-	float* z = kinect.getDistancePixels().getData();
-	indices.clear();
-	for(int y = 0; y < camHeight - stepSize; y += stepSize) {
-		for(int x = 0; x < camWidth - stepSize; x += stepSize) {
-			int i = y * camWidth + x;
-			unsigned int nwi = i;
-			unsigned int nei = nwi + stepSize;
-			unsigned int swi = nwi + (stepSize * camWidth);
-			unsigned int sei = swi + stepSize;
-			float nw = z[nwi];
-			float ne = z[nei];
-			float sw = z[swi];
-			float se = z[sei];
+    float* z = kinect.getDepthPixelsRef().getData();
+    if (z == NULL) return;
+    indices.clear();
+    for(int y = 0; y < camHeight - stepSize; y += stepSize) {
+        for(int x = 0; x < camWidth - stepSize; x += stepSize) {
+            int i = y * camWidth + x;
+            unsigned int nwi = i;
+            unsigned int nei = nwi + stepSize;
+            unsigned int swi = nwi + (stepSize * camWidth);
+            unsigned int sei = swi + stepSize;
+            float nw = z[nwi];
+            float ne = z[nei];
+            float sw = z[swi];
+            float se = z[sei];
 
-			if(nw != 0 && ne != 0 && sw != 0 &&
-				 abs(nw - ne) < maxLength && abs(nw - sw) < maxLength) {
-				indices.push_back(nwi);
-				indices.push_back(nei);
-				indices.push_back(swi);
-			}
+            if(nw != 0 && ne != 0 && sw != 0 &&
+                 abs(nw - ne) < maxLength && abs(nw - sw) < maxLength) {
+                indices.push_back(nwi);
+                indices.push_back(nei);
+                indices.push_back(swi);
+            }
 
-			if(ne != 0 && se != 0 && sw != 0 &&
-				 abs(sw - se) < maxLength && abs(ne - se) < maxLength) {
-				indices.push_back(nei);
-				indices.push_back(sei);
-				indices.push_back(swi);
-			}
-		}
-	}
+            if(ne != 0 && se != 0 && sw != 0 &&
+                 abs(sw - se) < maxLength && abs(ne - se) < maxLength) {
+                indices.push_back(nei);
+                indices.push_back(sei);
+                indices.push_back(swi);
+            }
+        }
+    }
 }
 
 void ofxVirtualKinectV2::renderCamera() {
 	fbo.begin();
 	ofClear(0, 255);
-
+    
 	glEnable(GL_FOG);
 
 	glClearColor(0, 0, 0, 1);
@@ -94,14 +92,14 @@ void ofxVirtualKinectV2::renderCamera() {
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-320 * orthoScale, 320 * orthoScale, -240 * orthoScale, 240 * orthoScale, nearClipping, farClipping);
+	glOrtho(-256 * orthoScale, 256 * orthoScale, -212 * orthoScale, 212 * orthoScale, nearClipping, farClipping);
 	glMatrixMode(GL_MODELVIEW);
 
 	glLoadIdentity();
 
 	ofRotateX(sceneRotation.x);
 	ofRotateY(sceneRotation.y);
-	ofRotateZ(sceneRotation.z);
+	ofRotateZ(sceneRotation.z - 180);
 	ofTranslate(position.x, position.y, position.z);
 	ofRotateX(cameraRotation.x);
 	ofRotateY(cameraRotation.y);
@@ -122,6 +120,8 @@ void ofxVirtualKinectV2::renderCamera() {
 	ofPopMatrix();
 
 	glDisable(GL_FOG);
+    
+    ofDisableDepthTest();
 
 	fbo.end();
 }
@@ -139,14 +139,14 @@ void ofxVirtualKinectV2::updatePixels() {
 }
 
 void ofxVirtualKinectV2::update() {
-	kinect.update();
-	if(kinect.isFrameNew()) {
-		newFrame = true;
-		updateSurface();
-		updateMesh();
+    kinect.update();
+    if(kinect.isFrameNew()) {
+        newFrame = true;
+        updateSurface();
+        updateMesh();
         updatePixels();
         renderCamera();
-	}
+    }
 }
 
 bool ofxVirtualKinectV2::isFrameNew() {

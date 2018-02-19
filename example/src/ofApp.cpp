@@ -6,7 +6,7 @@ void ofApp::setup() {
 	ofSetVerticalSync(true);
 	ofSetFrameRate(60);
     
-    float maxPosition = 4000;
+    float maxPosition = 2000;
     position.setName("position");
     position.setMin(ofVec3f(1,1,1) * -maxPosition);
     position.setMax(ofVec3f(1,1,1) * +maxPosition);
@@ -24,22 +24,22 @@ void ofApp::setup() {
     near.setMin(0);
     near.setMax(maxPosition);
     
-    far = maxPosition;
+    far = 1400;
     far.setName("far");
     far.setMin(0);
     far.setMax(maxPosition);
 	
-    maxLength = maxPosition;
+    maxLength = 15;
     maxLength.setName("max length");
     maxLength.setMin(0);
     maxLength.setMax(maxPosition);
     
-    stepSize = 2;
+    stepSize = 1;
     stepSize.setName("step size");
     stepSize.setMin(1);
     stepSize.setMax(16);
     
-    orthoScale = 10;
+    orthoScale = 1;
     orthoScale.setName("ortho scale");
     orthoScale.setMin(0);
     orthoScale.setMax(32);
@@ -69,16 +69,16 @@ void ofApp::update() {
     kinect.setOrthoScale(orthoScale);
     kinect.setHorizontalFlip(horizontalFlip);
 
-	kinect.update();
-	
-	if(kinect.isFrameNew()) {
-	}
+    kinect.update();
+
+    if(kinect.isFrameNew()) {
+    }
 }
 
 void ofApp::draw() {
 	ofBackground(127);
 	ofSetColor(255, 255, 255);
-	kinect.draw(300, 100);
+    kinect.draw(300, 100);
     panel.draw();
 }
 
