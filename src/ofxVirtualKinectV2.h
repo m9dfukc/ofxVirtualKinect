@@ -3,9 +3,9 @@
 #include "ofMain.h"
 #include "ofxMultiKinectV2.h"
 
-class ofxVirtualKinect2 : public ofBaseHasPixels {
+class ofxVirtualKinectV2 : public ofBaseHasPixels {
 public:
-	ofxVirtualKinect2();
+	ofxVirtualKinectV2();
 
     void setup();
     void close();

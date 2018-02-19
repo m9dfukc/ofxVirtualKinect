@@ -1,3 +1,4 @@
 ofxGui
+ofxTurboJpeg
 ofxMultiKinectV2
-ofxVirtualKinect
+ofxVirtualKinectV2

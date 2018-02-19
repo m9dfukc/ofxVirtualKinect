@@ -1,9 +1,9 @@
-#include "ofxVirtualKinect2.h"
+#include "ofxVirtualKinectV2.h"
 
 const unsigned int camWidth = 640;
 const unsigned int camHeight = 480;
 
-ofxVirtualKinect2::ofxVirtualKinect2() :
+ofxVirtualKinectV2::ofxVirtualKinectV2() :
 newFrame(false),
 maxLength(100),
 stepSize(2),
@@ -16,7 +16,7 @@ cameraRotation(ofVec3f(0, 0, 0)),
 horizontalFlip(true) {
 }
 
-void ofxVirtualKinect2::setup() {
+void ofxVirtualKinectV2::setup() {
 	surface.resize(camWidth * camHeight);
 	indices.resize(camWidth * camHeight * 3);
 
@@ -28,11 +28,11 @@ void ofxVirtualKinect2::setup() {
 	grayImage.allocate(camWidth, camHeight, OF_IMAGE_GRAYSCALE);
 }
 
-void ofxVirtualKinect2::close() {
+void ofxVirtualKinectV2::close() {
     kinect.close();
 }
 
-void ofxVirtualKinect2::updateSurface() {
+void ofxVirtualKinectV2::updateSurface() {
     float* z = kinect.getDistancePixels().getData();
 	for(int y = 0; y < camHeight; y += stepSize) {
 		for(int x = 0; x < camWidth; x += stepSize) {
@@ -44,7 +44,7 @@ void ofxVirtualKinect2::updateSurface() {
 	}
 }
 
-void ofxVirtualKinect2::updateMesh() {
+void ofxVirtualKinectV2::updateMesh() {
 	float* z = kinect.getDistancePixels().getData();
 	indices.clear();
 	for(int y = 0; y < camHeight - stepSize; y += stepSize) {
@@ -76,7 +76,7 @@ void ofxVirtualKinect2::updateMesh() {
 	}
 }
 
-void ofxVirtualKinect2::renderCamera() {
+void ofxVirtualKinectV2::renderCamera() {
 	fbo.begin();
 	ofClear(0, 255);
 
@@ -126,7 +126,7 @@ void ofxVirtualKinect2::renderCamera() {
 	fbo.end();
 }
 
-void ofxVirtualKinect2::updatePixels() {
+void ofxVirtualKinectV2::updatePixels() {
 	fbo.readToPixels(colorImage);
     unsigned char* grayPixels = grayImage.getData();
 	unsigned char* colorPixels = colorImage.getData();
@@ -138,7 +138,7 @@ void ofxVirtualKinect2::updatePixels() {
 	}
 }
 
-void ofxVirtualKinect2::update() {
+void ofxVirtualKinectV2::update() {
 	kinect.update();
 	if(kinect.isFrameNew()) {
 		newFrame = true;
@@ -149,66 +149,66 @@ void ofxVirtualKinect2::update() {
 	}
 }
 
-bool ofxVirtualKinect2::isFrameNew() {
+bool ofxVirtualKinectV2::isFrameNew() {
 	bool curNewFrame = newFrame;
 	newFrame = false;
 	return curNewFrame;
 }
 
-ofPixels& ofxVirtualKinect2::getPixels() {
+ofPixels& ofxVirtualKinectV2::getPixels() {
 	return grayImage;
 }
 
-const ofPixels& ofxVirtualKinect2::getPixels() const {
+const ofPixels& ofxVirtualKinectV2::getPixels() const {
     return grayImage;
 }
 
 
-void ofxVirtualKinect2::draw(float x, float y) {
+void ofxVirtualKinectV2::draw(float x, float y) {
 	fbo.draw(x, y);
 }
 
-void ofxVirtualKinect2::setMaxLength(float maxLength) {
+void ofxVirtualKinectV2::setMaxLength(float maxLength) {
 	this->maxLength = maxLength;
 }
 
-void ofxVirtualKinect2::setStepSize(int stepSize) {
+void ofxVirtualKinectV2::setStepSize(int stepSize) {
 	this->stepSize = stepSize;
 }
 
-void ofxVirtualKinect2::setClipping(float nearClipping, float farClipping) {
+void ofxVirtualKinectV2::setClipping(float nearClipping, float farClipping) {
 	this->nearClipping = nearClipping;
 	this->farClipping = farClipping;
 }
 
-void ofxVirtualKinect2::setOrthoScale(float orthoScale) {
+void ofxVirtualKinectV2::setOrthoScale(float orthoScale) {
 	this->orthoScale = orthoScale;
 }
 
-void ofxVirtualKinect2::setPosition(ofVec3f position) {
+void ofxVirtualKinectV2::setPosition(ofVec3f position) {
 	this->position = position;
 }
 
-void ofxVirtualKinect2::setCameraRotation(ofVec3f cameraRotation) {
+void ofxVirtualKinectV2::setCameraRotation(ofVec3f cameraRotation) {
 	this->cameraRotation = cameraRotation;
 }
 
-void ofxVirtualKinect2::setSceneRotation(ofVec3f sceneRotation) {
+void ofxVirtualKinectV2::setSceneRotation(ofVec3f sceneRotation) {
 	this->sceneRotation = sceneRotation;
 }
 
-void ofxVirtualKinect2::setHorizontalFlip(bool horizontalFlip) {
+void ofxVirtualKinectV2::setHorizontalFlip(bool horizontalFlip) {
 	this->horizontalFlip = horizontalFlip;
 }
 
-float ofxVirtualKinect2::grayToDistance(unsigned char value) const {
+float ofxVirtualKinectV2::grayToDistance(unsigned char value) const {
     return (1 - (float(value) / 255.)) * (farClipping - nearClipping) + nearClipping;
 }
 
-int ofxVirtualKinect2::getWidth() const {
+int ofxVirtualKinectV2::getWidth() const {
 	return camWidth;
 }
 
-int ofxVirtualKinect2::getHeight() const {
+int ofxVirtualKinectV2::getHeight() const {
 	return camHeight;
 }
